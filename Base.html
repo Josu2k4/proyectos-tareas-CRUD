@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos y Tareas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        .project {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .project h2 {
+            margin-bottom: 10px;
+            color: #ff00ff; /* Rosa neón */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f0f0f0;
+        }
+        .completed {
+            color: green;
+            font-weight: bold;
+        }
+        .pending {
+            color: red;
+            font-weight: bold;
+        }
+        .form-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-container input, .form-container button {
+            display: block;
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Proyectos y Tareas</h1>
+
+    <div class="form-container">
+        <h2>Añadir/Actualizar Tarea</h2>
+        <input type="text" id="projectName" placeholder="Nombre del proyecto">
+        <input type="text" id="taskName" placeholder="Nombre de la tarea">
+        <input type="text" id="taskDescription" placeholder="Descripción de la tarea">
+        <input type="date" id="taskDeadline" placeholder="Fecha límite">
+        <input type="checkbox" id="taskCompleted"> Completada
+        <button id="addTask">Añadir Tarea</button>
+        <button id="updateTask">Actualizar Tarea</button>
+        <button id="deleteTask">Eliminar Tarea</button>
+    </div>
+
+    <div id="projects"></div>
+
+    <script>
+        const data = {
+            "proyectos": [
+                {
+                    "id": 1,
+                    "nombre": "Proyecto Clinica Odontológica",
+                    "descripcion": "Desarrollo de un sistema de gestión para la clínica",
+                    "tarea": [
+                        {
+                            "id": 1,
+                            "nombre": "Diseñar la base de datos",
+                            "descripcion": "Definir las tablas, campos y relaciones para almacenar",
+                            "estado_completado": false,
+                            "fecha_limite": "2024-12-01"
+                        },
+                        {
+                            "id": 2,
+                            "nombre": "Implementar backend",
+                            "descripcion": "Crear las APIS necesarias para gestionar las operaciones",
+                            "estado_completado": false,
+                            "fecha_limite": "2024-12-15"
+                        },
+                        {
+                            "id": 3,
+                            "nombre": "Diseño de UI/UX",
+                            "descripcion": "Desarrollar una interfaz amigable para la gestión",
+                            "estado_completado": true,
+                            "fecha_limite": "2024-11-20"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const projectsContainer = document.getElementById("projects");
+
+        function renderProjects() {
+            projectsContainer.innerHTML = "";
+            data.proyectos.forEach(project => {
+                const projectDiv = document.createElement("div");
+                projectDiv.classList.add("project");
+
+                projectDiv.innerHTML = `
+                    <h2>${project.nombre}</h2>
+                    <p>${project.descripcion}</p>
+                    <h3>Tareas:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Fecha Límite</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                `;
+
+                const tbody = projectDiv.querySelector("tbody");
+
+                project.tarea.forEach(task => {
+                    const taskRow = document.createElement("tr");
+                    taskRow.innerHTML = `
+                        <td>${task.nombre}</td>
+                        <td>${task.descripcion}</td>
+                        <td class="${task.estado_completado ? 'completed' : 'pending'}">
+                            ${task.estado_completado ? 'Completado' : 'Pendiente'}
+                        </td>
+                        <td>${task.fecha_limite}</td>
+                    `;
+                    tbody.appendChild(taskRow);
+                });
+
+                projectsContainer.appendChild(projectDiv);
+            });
+        }
+
+        function addTask() {
+            const projectName = document.getElementById("projectName").value;
+            const taskName = document.getElementById("taskName").value;
+            const taskDescription = document.getElementById("taskDescription").value;
+            const taskDeadline = document.getElementById("taskDeadline").value;
+            const taskCompleted = document.getElementById("taskCompleted").checked;
+
+            const project = data.proyectos.find(p => p.nombre === projectName);
+            if (project) {
+                const newTask = {
+                    id: project.tarea.length + 1,
+                    nombre: taskName,
+                    descripcion: taskDescription,
+                    estado_completado: taskCompleted,
+                    fecha_limite: taskDeadline
+                };
+                project.tarea.push(newTask);
+                renderProjects();
+            } else {
+                alert("Proyecto no encontrado");
+            }
+        }
+
+        function updateTask() {
+            const projectName = document.getElementById("projectName").value;
+            const taskName = document.getElementById("taskName").value;
+            const taskDescription = document.getElementById("taskDescription").value;
+            const taskDeadline = document.getElementById("taskDeadline").value;
+            const taskCompleted = document.getElementById("taskCompleted").checked;
+
+            const project = data.proyectos.find(p => p.nombre === projectName);
+            if (project) {
+                const task = project.tarea.find(t => t.nombre === taskName);
+                if (task) {
+                    task.descripcion = taskDescription;
+                    task.fecha_limite = taskDeadline;
+                    task.estado_completado = taskCompleted;
+                    renderProjects();
+                } else {
+                    alert("Tarea no encontrada");
+                }
+            } else {
+                alert("Proyecto no encontrado");
+            }
+        }
+
+        function deleteTask() {
+            const projectName = document.getElementById("projectName").value;
+            const taskName = document.getElementById("taskName").value;
+
+            const project = data.proyectos.find(p => p.nombre === projectName);
+            if (project) {
+                const taskIndex = project.tarea.findIndex(t => t.nombre === taskName);
+                if (taskIndex !== -1) {
+                    project.tarea.splice(taskIndex, 1);
+                    renderProjects();
+                } else {
+                    alert("Tarea no encontrada");
+                }
+            } else {
+                alert("Proyecto no encontrado");
+            }
+        }
+
+        document.getElementById("addTask").addEventListener("click", addTask);
+        document.getElementById("updateTask").addEventListener("click", updateTask);
+        document.getElementById("deleteTask").addEventListener("click", deleteTask);
+
+        renderProjects();
+    </script>
+</body>
+</html>
+
+
